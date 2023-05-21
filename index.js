@@ -36,6 +36,22 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/toys/engineering', async(req, res) => {
+     const category = req.params.category;
+     const result = await toysCollection.find({ category: 'Engineering' }).limit(3).toArray();
+     res.send(result);
+    })
+    app.get('/toys/language', async(req, res) => {
+     const category = req.params.category;
+     const result = await toysCollection.find({ category: 'Language' }).limit(3).toArray();
+     res.send(result);
+    })
+    app.get('/toys/math', async(req, res) => {
+     const category = req.params.category;
+     const result = await toysCollection.find({ category: 'Math' }).limit(3).toArray();
+     res.send(result);
+    })
+
     
     
    
