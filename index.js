@@ -27,12 +27,16 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const toysCollection =  client.db('kidsDB').collection('toys')
 
     app.get('/toys', async(req, res) => {
       const result = await toysCollection.find().limit(6).toArray()
+      res.send(result);
+    })
+    app.get('/allToys', async(req, res) => {
+      const result = await toysCollection.find().limit(20).toArray()
       res.send(result);
     })
 
@@ -60,11 +64,62 @@ async function run() {
       res.send(result);
     })
 
+    // my toys api
+
+    app.get('/myToys/:email', async (req, res) => {
+      console.log(req.params.email)
+      const result = await toysCollection.find({
+        sellerEmail: req.params.email}).toArray();
+      res.send(result);
+    })
+
+    //update 
+    app.patch('/myToys/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+       const updatedToys = req.body;
+       const options = { upsert: true };
+       const updateDoc = {
+        $set: {
+          status : updatedToys.status
+        },
+      };
+      const result = await toysCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
+    //delete my toys
+    app.delete('/myToys/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await toysCollection.deleteOne(query)
+      res.send(result);
+    })
+
+    //search toys api
+  //   const indexKeys = {name:1, category:1}
+  //  const indexOptions = {name: 'nameCategory'}
+  //  const result = await toysCollection.createIndex(indexKeys, indexOptions);
+
+    // app.get("/getToysByName/:text", async (req, res) => {
+    //   const searchText = req.params.text;
+    //   const result = await toysCollection
+    //     .find({
+    //       $or: [
+    //         { title: { $regex: searchText, $options: "i" } },
+    //         { category: { $regex: searchText, $options: "i" } },
+    //       ],
+    //     })
+    //     .toArray();
+    //   res.send(result);
+    // });
+
+
     
     
    
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
